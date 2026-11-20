@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>UTM-NOW</title>
+<style>
+  :root {
+    --accent: #e11d48;
+    --accent-hover: #be123c;
+    --accent-border: #fecdd3;
+    --ink: #0f172a;
+    --text: #334155;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --chip: #f1f5f9;
+    --dark: #0f172a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    width: 380px; margin: 0; padding: 16px;
+    color: var(--text); background: #fff;
+    font: 13px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  code {
+    font: 11px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--chip); color: var(--ink); padding: 1px 4px; border-radius: 4px;
+  }
+  .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; color: var(--ink); letter-spacing: -.01em; }
+  .logo { width: 24px; height: 24px; border-radius: 7px; background: var(--accent); display: grid; place-items: center; }
+  .badge {
+    font-size: 11px; font-weight: 500; color: var(--accent);
+    border: 1px solid var(--accent-border); border-radius: 999px; padding: 1px 8px;
+  }
+
+  .field { margin-top: 12px; }
+  .field:first-of-type { margin-top: 0; }
+  label { display: block; margin-bottom: 4px; font-size: 12px; font-weight: 500; color: var(--ink); }
+  input {
+    width: 100%; height: 34px; padding: 6px 10px;
+    font: inherit; font-size: 13px; color: var(--ink); background: #fff;
+    border: 1px solid #cbd5e1; border-radius: 6px;
+  }
+  input::placeholder { color: #94a3b8; }
+  input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+  .hint { margin: 4px 0 0; font-size: 11px; color: var(--muted); }
+  .req { margin: 0 0 12px; font-size: 12px; font-weight: 600; color: var(--ink); }
+
+  details { border-top: 1px solid var(--line); margin-top: 14px; }
+  details > summary {
+    list-style: none; cursor: pointer; padding: 12px 0 0;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; font-weight: 600; color: var(--ink);
+  }
+  details > summary::-webkit-details-marker { display: none; }
+  .chev { width: 16px; height: 16px; color: var(--muted); transition: transform .15s; }
+  details[open] > summary .chev { transform: rotate(180deg); }
+  details .inner { padding-top: 12px; }
+
+  .result-label { margin: 16px 0 6px; font-size: 12px; font-weight: 500; color: var(--ink); }
+  #out {
+    min-height: 44px; padding: 10px 12px; border-radius: 8px;
+    background: var(--dark); color: #e2e8f0;
+    font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break: break-all;
+  }
+  #out:empty::before { content: "Fill in the fields above to build your link"; color: #64748b; }
+  #err { min-height: 18px; margin-top: 6px; font-size: 11px; color: var(--muted); }
+  #err.bad { color: var(--accent); font-weight: 500; }
+
+  button#copy {
+    width: 100%; margin-top: 2px; height: 40px;
+    font: inherit; font-size: 14px; font-weight: 600; letter-spacing: .02em;
+    color: #fff; background: var(--accent); border: 0; border-radius: 6px; cursor: pointer;
+    transition: background .12s, transform .05s;
+  }
+  button#copy:hover:not(:disabled) { background: var(--accent-hover); }
+  button#copy:active:not(:disabled) { transform: translateY(1px); }
+  button#copy:disabled { background: #fda4af; cursor: not-allowed; }
+
+  .about { margin-top: 14px; }
+  .about p { margin: 8px 0 0; font-size: 12px; }
+  .about ul { margin: 6px 0 0; padding-left: 18px; font-size: 12px; }
+  .about li { margin-bottom: 4px; }
+  .about strong { color: var(--ink); }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 32 32" fill="none"><path d="M9 7v11a7 7 0 0 0 14 0V7" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>
+      </span>
+      UTM-NOW
+    </div>
+    <span class="badge">Free · No sign-up</span>
+  </div>
+
+  <p class="req">Required parameters</p>
+
+  <div class="field">
+    <label for="url">Website URL</label>
+    <input id="url" type="text" placeholder="https://yoursite.com/page" autocomplete="off">
+  </div>
+  <div class="field">
+    <label for="campaign">Campaign</label>
+    <input id="campaign" type="text" placeholder="spring_sale" autocomplete="off">
+    <p class="hint">The push this link belongs to, e.g. <code>spring_sale</code></p>
+  </div>
+  <div class="field">
+    <label for="medium">Medium</label>
+    <input id="medium" type="text" placeholder="email" autocomplete="off">
+    <p class="hint">The type of channel, e.g. <code>email</code>, <code>social</code>, <code>cpc</code></p>
+  </div>
+  <div class="field">
+    <label for="source">Source</label>
+    <input id="source" type="text" placeholder="newsletter" autocomplete="off">
+    <p class="hint">Where the click comes from, e.g. <code>newsletter</code>, <code>linkedin</code></p>
+  </div>
+
+  <details class="optional">
+    <summary>Optional parameters
+      <svg class="chev" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg>
+    </summary>
+    <div class="inner">
+      <div class="field">
+        <label for="id">Campaign ID</label>
+        <input id="id" type="text" placeholder="abc123" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="term">Term</label>
+        <input id="term" type="text" placeholder="running_shoes" autocomplete="off">
+        <p class="hint">The keyword, for paid search ads.</p>
+      </div>
+      <div class="field">
+        <label for="content">Content</label>
+        <input id="content" type="text" placeholder="hero_banner" autocomplete="off">
+        <p class="hint">Tells apart two links or two ad versions.</p>
+      </div>
+    </div>
+  </details>
+
+  <div class="result-label">Your tagged URL</div>
+  <div id="out"></div>
+  <div id="err"></div>
+  <button id="copy" disabled>Copy tagged URL</button>
+
+  <details class="about">
+    <summary>About UTM parameters
+      <svg class="chev" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg>
+    </summary>
+    <div class="inner">
+      <p style="margin-top:0">UTM parameters are small tags added to the end of a link. They don't change where it goes. When someone clicks, your analytics tool reads them and files the visit under the right campaign.</p>
+      <ul>
+        <li><strong>utm_source</strong>: who sent the visitor, e.g. <code>newsletter</code>, <code>linkedin</code>.</li>
+        <li><strong>utm_medium</strong>: the kind of channel, e.g. <code>email</code>, <code>social</code>, <code>cpc</code>.</li>
+        <li><strong>utm_campaign</strong>: the initiative, e.g. <code>spring_sale</code>.</li>
+        <li><strong>utm_id</strong>, <strong>utm_term</strong>, <strong>utm_content</strong>: optional. An ID to match your records, the paid-search keyword, and a label to tell similar links apart.</li>
+      </ul>
+      <p>Tip: use lowercase everywhere. <code>LinkedIn</code> and <code>linkedin</code> show up as two different sources in reports.</p>
+    </div>
+  </details>
+
+  <script src="utm.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UTM-NOW: free UTM link builder</title>
+<meta name="description" content="Paste a link, fill in three fields, get a UTM-tagged link. Free, no sign-up, runs entirely in your browser.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23e11d48'/%3E%3Cpath d='M9 10v8a7 7 0 0 0 14 0v-8' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --accent: #e11d48;
+    --accent-hover: #be123c;
+    --accent-soft: #fff1f2;
+    --accent-border: #fecdd3;
+    --ink: #0f172a;
+    --text: #334155;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --chip: #f1f5f9;
+    --dark: #0f172a;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; color: var(--text); background: #fff;
+    font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  code {
+    font: 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--chip); color: var(--ink); padding: 1px 5px; border-radius: 4px;
+    overflow-wrap: anywhere;
+  }
+
+  header { border-bottom: 1px solid var(--line); }
+  .bar { max-width: 1040px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; gap: 10px; }
+  .logo { width: 28px; height: 28px; border-radius: 8px; background: var(--accent); display: grid; place-items: center; }
+  .wordmark { font-weight: 700; letter-spacing: -.01em; color: var(--ink); }
+
+  main { max-width: 640px; margin: 0 auto; padding: 40px 20px 72px; }
+  .hero { text-align: center; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 500; color: var(--accent);
+    border: 1px solid var(--accent-border); background: #fff; border-radius: 999px; padding: 2px 10px;
+  }
+  .badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  h1 { margin: 16px 0 12px; font-size: clamp(34px, 7vw, 48px); line-height: 1.1; font-weight: 600; letter-spacing: -.025em; color: var(--ink); }
+  .lede { margin: 0 auto; max-width: 480px; color: var(--muted); font-size: 17px; }
+
+  .card { margin-top: 36px; border: 1px solid var(--line); border-radius: 16px; padding: 24px; }
+  h2.card-title { margin: 0; font-size: 14px; font-weight: 600; color: var(--ink); }
+  .card-note { margin: 2px 0 16px; font-size: 13px; color: var(--muted); }
+  .field { margin-top: 16px; }
+  .field:first-of-type { margin-top: 0; }
+  label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--ink); }
+  input {
+    width: 100%; height: 36px; padding: 8px 12px;
+    font: inherit; font-size: 14px; color: var(--ink); background: #fff;
+    border: 1px solid #cbd5e1; border-radius: 6px;
+  }
+  input::placeholder { color: #94a3b8; }
+  input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+  .hint { margin: 6px 0 0; font-size: 12px; color: var(--muted); }
+
+  details.optional { margin-top: 20px; border-top: 1px solid var(--line); }
+  details.optional > summary {
+    list-style: none; cursor: pointer; padding: 16px 0 0;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 14px; font-weight: 600; color: var(--ink);
+  }
+  details.optional > summary::-webkit-details-marker { display: none; }
+  .chev { width: 18px; height: 18px; transition: transform .15s; color: var(--muted); }
+  details[open] > summary .chev { transform: rotate(180deg); }
+  details.optional .fields { padding-top: 16px; }
+
+  .result-label { margin: 24px 0 8px; font-size: 13px; font-weight: 500; color: var(--ink); }
+  #out {
+    min-height: 48px; padding: 14px 16px; border-radius: 10px;
+    background: var(--dark); color: #e2e8f0;
+    font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break: break-all;
+  }
+  #out:empty::before { content: "Fill in the fields above to build your link"; color: #64748b; }
+  #err { min-height: 20px; margin-top: 8px; font-size: 12px; color: var(--muted); }
+  #err.bad { color: var(--accent); font-weight: 500; }
+
+  button#copy {
+    margin-top: 4px; height: 40px; padding: 0 20px;
+    font: inherit; font-size: 14px; font-weight: 600; letter-spacing: .02em;
+    color: #fff; background: var(--accent); border: 0; border-radius: 6px; cursor: pointer;
+    transition: background .12s, transform .05s;
+  }
+  button#copy:hover:not(:disabled) { background: var(--accent-hover); }
+  button#copy:active:not(:disabled) { transform: translateY(1px); }
+  button#copy:disabled { background: #fda4af; cursor: not-allowed; }
+
+  .ext { margin-top: 48px; border: 1px solid var(--line); border-radius: 16px; padding: 24px; background: #fff; }
+  .ext h2 { margin: 0 0 6px; font-size: 20px; line-height: 1.25; font-weight: 600; letter-spacing: -.015em; color: var(--ink); }
+  .ext > p { margin: 0 0 16px; color: var(--muted); }
+  .ext h3 { margin: 24px 0 10px; font-size: 14px; font-weight: 600; color: var(--ink); }
+  a.dl {
+    display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 18px;
+    font-size: 14px; font-weight: 600; color: var(--accent); text-decoration: none;
+    background: var(--accent-soft); border: 1px solid var(--accent-border); border-radius: 6px;
+  }
+  a.dl:hover { background: #ffe4e6; }
+  ol.steps { list-style: none; counter-reset: s; margin: 0; padding: 0; }
+  ol.steps li { counter-increment: s; position: relative; padding: 0 0 14px 38px; min-height: 28px; font-size: 15px; }
+  ol.steps li::before {
+    content: counter(s); position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 13px; font-weight: 600; color: var(--accent); background: var(--accent-soft);
+  }
+  ol.steps strong { color: var(--ink); }
+  button.mini {
+    margin-left: 6px; height: 26px; padding: 0 10px; font: inherit; font-size: 12px; font-weight: 600;
+    color: var(--ink); background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer;
+  }
+  button.mini:hover { border-color: var(--accent); color: var(--accent); }
+  .ext .small { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
+
+  hr { border: 0; border-top: 1px solid var(--line); margin: 56px 0 40px; }
+  article h2 { margin: 0 0 12px; font-size: 24px; line-height: 1.25; font-weight: 600; letter-spacing: -.015em; color: var(--ink); }
+  article p { margin: 0 0 14px; }
+  article strong { color: var(--ink); }
+  article ul { margin: 0 0 14px; padding-left: 22px; }
+  article li { margin-bottom: 6px; }
+  article h3 { margin: 28px 0 8px; font-size: 16px; color: var(--ink); }
+  article code { font-size: 13px; }
+
+  .faq { margin-top: 48px; }
+  .faq details { border-top: 1px solid var(--line); }
+  .faq details:last-child { border-bottom: 1px solid var(--line); }
+  .faq summary {
+    list-style: none; cursor: pointer; padding: 14px 0;
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    font-size: 15px; color: var(--ink);
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq details[open] .chev { transform: rotate(180deg); }
+  .faq .answer { padding: 0 0 16px; color: var(--text); font-size: 15px; }
+  .faq .answer p { margin: 0 0 10px; }
+
+  footer { border-top: 1px solid var(--line); padding: 28px 20px; text-align: center; font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <span class="logo" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 32 32" fill="none"><path d="M9 7v11a7 7 0 0 0 14 0V7" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>
+      </span>
+      <span class="wordmark">UTM-NOW</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <span class="badge">Free tool · No sign-up</span>
+      <h1>UTM-NOW</h1>
+      <p class="lede">Paste a link, add three tags, and your analytics tool will know exactly which campaign sent the click.</p>
+    </section>
+
+    <section class="card" aria-label="UTM builder">
+      <h2 class="card-title">Required parameters</h2>
+      <p class="card-note">These three are the minimum for campaign tracking to work properly.</p>
+
+      <div class="field">
+        <label for="url">Website URL</label>
+        <input id="url" type="text" placeholder="https://yoursite.com/page" autocomplete="off" autofocus>
+      </div>
+      <div class="field">
+        <label for="campaign">Campaign</label>
+        <input id="campaign" type="text" placeholder="spring_sale" autocomplete="off">
+        <p class="hint">The push this link belongs to, e.g. <code>spring_sale</code>, <code>product_launch</code>.</p>
+      </div>
+      <div class="field">
+        <label for="medium">Medium</label>
+        <input id="medium" type="text" placeholder="email" autocomplete="off">
+        <p class="hint">The type of channel, e.g. <code>email</code>, <code>social</code>, <code>cpc</code>, <code>print</code>.</p>
+      </div>
+      <div class="field">
+        <label for="source">Source</label>
+        <input id="source" type="text" placeholder="newsletter" autocomplete="off">
+        <p class="hint">The exact place the click comes from, e.g. <code>newsletter</code>, <code>linkedin</code>, <code>google</code>.</p>
+      </div>
+
+      <details class="optional">
+        <summary>
+          Optional parameters
+          <svg class="chev" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg>
+        </summary>
+        <div class="fields">
+          <div class="field">
+            <label for="id">Campaign ID</label>
+            <input id="id" type="text" placeholder="abc123" autocomplete="off">
+            <p class="hint">An internal reference, e.g. a ticket or brief number.</p>
+          </div>
+          <div class="field">
+            <label for="term">Term</label>
+            <input id="term" type="text" placeholder="running_shoes" autocomplete="off">
+            <p class="hint">The keyword, for paid search ads.</p>
+          </div>
+          <div class="field">
+            <label for="content">Content</label>
+            <input id="content" type="text" placeholder="hero_banner" autocomplete="off">
+            <p class="hint">Tells apart two links on the same page or two ad versions.</p>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <div class="result-label">Your tagged URL</div>
+    <div id="out" aria-live="polite"></div>
+    <div id="err"></div>
+    <button id="copy" disabled>Copy tagged URL</button>
+
+    <section class="ext" id="extension">
+      <h2>Use it right inside Chrome</h2>
+      <p>Install the UTM-NOW extension and tag whatever page you're on with one click. No account, no sign-up.</p>
+      <a class="dl" href="utm-now-extension.zip" download>
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v10m0 0l-4-4m4 4l4-4M4 17h12"/></svg>
+        Download the extension
+      </a>
+
+      <h3>Install it (about a minute, only once)</h3>
+      <ol class="steps">
+        <li><strong>Unzip the file.</strong> Double-click <code>utm-now-extension.zip</code> in your Downloads folder. You'll get a folder with the same name. Move it somewhere it can stay, like Documents, and don't delete it afterwards.</li>
+        <li><strong>Open Chrome's extensions page.</strong> Paste <code>chrome://extensions</code> into Chrome's address bar and press Enter.
+          <button class="mini" id="copyaddr" type="button">Copy address</button></li>
+        <li><strong>Turn on "Developer mode".</strong> It's the switch at the top right of that page.</li>
+        <li><strong>Click "Load unpacked".</strong> Pick the unzipped folder, then press Select.</li>
+        <li><strong>Pin it.</strong> Click the puzzle-piece icon at the top right of Chrome, then the pin next to UTM-NOW, so it's always one click away.</li>
+      </ol>
+      <p class="small">If Chrome ever shows a warning about developer mode extensions, that's normal for extensions installed this way. Just keep UTM-NOW enabled.</p>
+
+      <h3>Use it</h3>
+      <ol class="steps">
+        <li><strong>Open the page you want to share.</strong> This can be your website, a blog post, a product page or anything else.</li>
+        <li><strong>Click the UTM-NOW icon.</strong> The page's link is filled in for you.</li>
+        <li><strong>Fill in Campaign, Medium and Source.</strong> The grey examples under each box show what to type.</li>
+        <li><strong>Click "Copy tagged URL".</strong> The link is now on your clipboard. Paste it into your email, post or ad.</li>
+      </ol>
+    </section>
+
+    <hr>
+
+    <article>
+      <h2>About UTM parameters</h2>
+      <p>UTM parameters are small tags added to the end of a link, like <code>?utm_source=newsletter&amp;utm_medium=email&amp;utm_campaign=spring_sale</code>. They don't change where the link goes. When someone clicks, your analytics tool (Google Analytics, Plausible, Fathom, Matomo and most others) reads the tags and files that visit under the right campaign.</p>
+      <p>Without them, a click from your newsletter, a LinkedIn post and a paid ad can all land in the same "direct" or "referral" bucket, and you can't tell which one worked.</p>
+
+      <h3>The three required parameters</h3>
+      <ul>
+        <li><strong>utm_source</strong>: who or what sent the visitor. A site, platform or list, such as <code>newsletter</code>, <code>linkedin</code> or <code>google</code>.</li>
+        <li><strong>utm_medium</strong>: the kind of channel it travelled through, such as <code>email</code>, <code>social</code>, <code>cpc</code> or <code>print</code>.</li>
+        <li><strong>utm_campaign</strong>: the initiative the link belongs to, such as <code>spring_sale</code> or <code>product_launch</code>.</li>
+      </ul>
+
+      <h3>The optional ones</h3>
+      <ul>
+        <li><strong>utm_id</strong>: an ID you can match against your own records or ad platform.</li>
+        <li><strong>utm_term</strong>: the keyword you bid on in paid search.</li>
+        <li><strong>utm_content</strong>: a label for telling apart links in the same campaign, such as <code>header_button</code> vs <code>footer_link</code>, or ad A vs ad B.</li>
+      </ul>
+
+      <p>This builder works for any analytics tool that reads UTM parameters. Everything is built in your browser, so your links are never sent anywhere.</p>
+    </article>
+
+    <section class="faq">
+      <article><h2>Frequently asked questions</h2></article>
+
+      <details>
+        <summary>Are the optional parameters worth filling in?
+          <svg class="chev" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg>
+        </summary>
+        <div class="answer"><p>Sometimes. <code>utm_content</code> is the most useful: it lets you A/B test two buttons or two ad versions inside one campaign. <code>utm_term</code> only matters for paid search, and <code>utm_id</code> only if you need to match clicks to something in another system. If in doubt, skip them.</p></div>
+      </details>
+
+      <details>
+        <summary>What's the difference between source and medium?
+          <svg class="chev" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg>
+        </summary>
+        <div class="answer"><p>Source is the specific place, medium is the type of place. <code>linkedin</code> and <code>instagram</code> are different sources but share the medium <code>social</code>. That way you can look at all social together, or drill down to one platform.</p></div>
+      </details>
+
+      <details>
+        <summary>Should I use lowercase or uppercase?
+          <svg class="chev" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg>
+        </summary>
+        <div class="answer"><p>Lowercase, always. Analytics tools treat <code>LinkedIn</code> and <code>linkedin</code> as two different sources, so your reports split in two. Pick one style (for example lowercase with underscores, no spaces) and have your whole team use it.</p></div>
+      </details>
+
+      <details>
+        <summary>Can I put UTM links on links inside my own website?
+          <svg class="chev" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg>
+        </summary>
+        <div class="answer"><p>Avoid it. A UTM tag on an internal link can start a new session and overwrite the original source of the visit. Use UTMs on links that bring people <em>to</em> your site: emails, social posts, ads, partner pages and printed material.</p></div>
+      </details>
+
+      <details>
+        <summary>Does it matter if the link already has a ? in it?
+          <svg class="chev" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg>
+        </summary>
+        <div class="answer"><p>No. Paste the link as it is. Existing parameters and any <code>#section</code> at the end are kept, and the UTM tags are added in the right place.</p></div>
+      </details>
+    </section>
+  </main>
+
+  <footer>UTM-NOW · Free, no sign-up, nothing leaves your browser.</footer>
+
+<script>
+// Turn a link + UTM values into the tagged link.
+function buildUtmUrl(raw, params) {
+  raw = (raw || "").trim();
+  if (!raw) return { error: "Paste a link" };
+  if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(raw)) raw = "https://" + raw;
+
+  let url;
+  try {
+    url = new URL(raw);
+  } catch (e) {
+    return { error: "That doesn't look like a valid link" };
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    return { error: "Only http(s) links can be tagged" };
+  }
+
+  const keys = ["source", "medium", "campaign", "id", "content", "term"];
+  for (const k of keys) {
+    const key = "utm_" + k;
+    const val = ((params && params[k]) || "").trim();
+    if (val) url.searchParams.set(key, val);
+    else url.searchParams.delete(key);
+  }
+
+  const missing = ["source", "medium", "campaign"].filter(
+    (k) => !((params && params[k]) || "").trim()
+  );
+  return { url: url.toString(), missing };
+}
+
+const $ = (id) => document.getElementById(id);
+const fields = ["source", "medium", "campaign", "id", "content", "term"];
+const LABEL = "Copy tagged URL";
+
+function render() {
+  const params = {};
+  fields.forEach((f) => (params[f] = $(f).value));
+  const res = buildUtmUrl($("url").value, params);
+  const err = $("err");
+
+  if (res.error) {
+    $("out").textContent = "";
+    err.textContent = $("url").value.trim() ? res.error : "";
+    err.className = $("url").value.trim() ? "bad" : "";
+    $("copy").disabled = true;
+    return;
+  }
+  $("out").textContent = res.url;
+  if (res.missing.length) {
+    err.textContent = "Still needed: " + res.missing.map((m) => "utm_" + m).join(", ");
+    err.className = "";
+  } else {
+    err.textContent = "";
+    err.className = "";
+  }
+  $("copy").disabled = res.missing.length > 0;
+}
+
+$("copy").addEventListener("click", async () => {
+  await navigator.clipboard.writeText($("out").textContent);
+  const b = $("copy");
+  b.textContent = "Copied!";
+  setTimeout(() => (b.textContent = LABEL), 1200);
+});
+
+["url", ...fields].forEach((id) => $(id).addEventListener("input", render));
+render();
+
+// Browsers block links to chrome:// pages, so give people a copy button instead.
+$("copyaddr").addEventListener("click", async () => {
+  await navigator.clipboard.writeText("chrome://extensions");
+  const b = $("copyaddr");
+  b.textContent = "Copied!";
+  setTimeout(() => (b.textContent = "Copy address"), 1500);
+});
+</script>
+</body>
+</html>
