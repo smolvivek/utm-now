@@ -5,7 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>UTM-NOW: free UTM link builder</title>
 <meta name="description" content="Paste a link, fill in three fields, get a UTM-tagged link. Free, no sign-up, runs entirely in your browser.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23e11d48'/%3E%3Cpath d='M9 10v8a7 7 0 0 0 14 0v-8' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="/favicon-64.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="UTM-NOW">
+<meta property="og:title" content="UTM-NOW: free UTM link builder">
+<meta property="og:description" content="Paste a link, fill in three fields, get a UTM-tagged link. Free, no sign-up.">
+<meta property="og:url" content="https://utm-now-site.vercel.app/">
+<meta property="og:image" content="https://utm-now-site.vercel.app/og-image.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="UTM-NOW pixel lightning-bolt logo: free UTM link builder">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://utm-now-site.vercel.app/og-image.png">
 <style>
   :root {
     --accent: #e11d48;
@@ -33,7 +47,7 @@
 
   header { border-bottom: 1px solid var(--line); }
   .bar { max-width: 1040px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; gap: 10px; }
-  .logo { width: 28px; height: 28px; border-radius: 8px; background: var(--accent); display: grid; place-items: center; }
+  .logo { width: 28px; height: 28px; display: block; image-rendering: pixelated; }
   .wordmark { font-weight: 700; letter-spacing: -.01em; color: var(--ink); }
 
   main { max-width: 640px; margin: 0 auto; padding: 40px 20px 72px; }
@@ -145,9 +159,7 @@
 <body>
   <header>
     <div class="bar">
-      <span class="logo" aria-hidden="true">
-        <svg width="16" height="16" viewBox="0 0 32 32" fill="none"><path d="M9 7v11a7 7 0 0 0 14 0V7" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>
-      </span>
+      <img class="logo" src="/favicon-64.png" width="28" height="28" alt="">
       <span class="wordmark">UTM-NOW</span>
     </div>
   </header>

@@ -27,7 +27,7 @@
   }
   .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
   .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; color: var(--ink); letter-spacing: -.01em; }
-  .logo { width: 24px; height: 24px; border-radius: 7px; background: var(--accent); display: grid; place-items: center; }
+  .logo { width: 24px; height: 24px; display: block; image-rendering: pixelated; }
   .badge {
     font-size: 11px; font-weight: 500; color: var(--accent);
     border: 1px solid var(--accent-border); border-radius: 999px; padding: 1px 8px;
@@ -87,9 +87,7 @@
 <body>
   <div class="top">
     <div class="brand">
-      <span class="logo" aria-hidden="true">
-        <svg width="14" height="14" viewBox="0 0 32 32" fill="none"><path d="M9 7v11a7 7 0 0 0 14 0V7" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>
-      </span>
+      <img class="logo" src="icons/icon-48.png" width="24" height="24" alt="">
       UTM-NOW
     </div>
     <span class="badge">Free · No sign-up</span>
